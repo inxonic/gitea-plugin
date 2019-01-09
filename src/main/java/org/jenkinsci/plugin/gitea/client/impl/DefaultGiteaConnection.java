@@ -214,7 +214,20 @@ class DefaultGiteaConnection implements GiteaConnection {
 
     @Override
     public List<GiteaRepository> fetchRepositories(GiteaOwner owner) throws IOException, InterruptedException {
-        return fetchRepositories(owner.getUsername());
+        String username = owner.getUsername();
+        if (owner instanceof GiteaOrganization) {
+            return getList(
+                    api()
+                            .literal("/orgs")
+                            .path(UriTemplateBuilder.var("username"))
+                            .literal("/repos")
+                            .build()
+                            .set("username", username),
+                    GiteaRepository.class
+            );
+        } else {
+            return fetchRepositories(username);
+        }
     }
 
     @Override
